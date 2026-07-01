@@ -15,4 +15,18 @@ Agent-agnostic source of truth for personal and installed agent skills.
 - Claude: `/home/beasty/.claude/skills`
 - Pi: `/home/beasty/.pi/agent/skills`
 
+## Sync Symlinks
+
+Run this after cloning or updating the repo:
+
+```bash
+scripts/sync-skill-symlinks.sh
+```
+
+Preview changes without writing:
+
+```bash
+scripts/sync-skill-symlinks.sh --dry-run
+```
+
 Keep generated app state, auth files, logs, and model caches out of this repo.
