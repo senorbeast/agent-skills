@@ -4,7 +4,7 @@ Agent-agnostic source of truth for personal and installed agent skills.
 
 ## One-Line Install
 
-Set up this repo, global Codex guidance, and skill symlinks for Codex, Claude, and Pi:
+Clone or update this repo at `~/.agents` and link global Codex guidance:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/senorbeast/agent-skills/main/install.sh | bash
@@ -14,14 +14,42 @@ curl -fsSL https://raw.githubusercontent.com/senorbeast/agent-skills/main/instal
 
 - `AGENTS.md` is the tracked copy of global agent guidance.
 - `skills/` contains real skill directories.
-- Agent-specific skill folders should symlink into `skills/` instead of storing separate copies.
 - `.skill-lock.json` tracks skills installed by `npx skills@latest`.
 
-## Linked Agent Roots
+## Working With `npx skills`
 
-- Codex: `~/.codex/skills`
-- Claude: `~/.claude/skills`
-- Pi: `~/.pi/agent/skills`
+This repo intentionally uses the same root that `npx skills@latest` uses:
+
+```text
+~/.agents
+```
+
+Use `npx skills@latest` as the authority for installing skills and creating symlinks for supported agents. This repo versions the resulting `~/.agents` directory; it does not replace the interactive TUI.
+
+Expected setup workflow:
+
+```bash
+# First, register this repo as the global skills source and choose skills/agents interactively
+npx skills@latest add ~/.agents -g --full-depth
+
+# Then install or update Matt Pocock skills and choose agent symlink targets in the TUI
+npx skills@latest add mattpocock/skills -g
+
+# Version the resulting skills and lockfile
+cd ~/.agents
+git status
+git add skills .skill-lock.json
+git commit -m "Update installed skills"
+git push
+```
+
+In this setup:
+
+- `npx skills@latest` owns installing/updating external skills.
+- `npx skills@latest` owns broad multi-agent symlink setup.
+- This Git repo owns syncing your `~/.agents` files across machines.
+
+Do not clone this repo somewhere else while also letting `npx skills` manage `~/.agents`; that creates two sources of truth.
 
 ## Global Guidance
 
@@ -53,7 +81,9 @@ pi --append-system-prompt ~/.agents/AGENTS.md
 
 ## Sync Symlinks
 
-Run this after cloning or updating the repo:
+Prefer `npx skills@latest` for symlink setup because it supports more agents and has an interactive TUI.
+
+This repo still includes a conservative fallback script for Codex, Claude, and Pi only:
 
 ```bash
 scripts/sync-skill-symlinks.sh

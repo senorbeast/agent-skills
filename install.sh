@@ -10,8 +10,8 @@ usage() {
   cat <<'EOF'
 Usage: install.sh [options]
 
-Install or update the agent-skills repo and sync skill symlinks for Codex,
-Claude, and Pi.
+Install or update the agent-skills repo. Use npx skills@latest to install
+skills and manage agent-specific symlinks.
 
 Options:
   --dir PATH        Install directory (default: ~/.agents)
@@ -86,7 +86,6 @@ else
   git clone --branch "$branch" "$repo_url" "$install_dir"
 fi
 
-"$install_dir/scripts/sync-skill-symlinks.sh" --repo "$install_dir"
 
 if [[ "$sync_global_agents" != "0" ]]; then
   mkdir -p "$HOME/.codex"
@@ -117,3 +116,4 @@ if [[ "$sync_global_agents" != "0" ]]; then
 fi
 
 echo "Agent skills setup complete."
+echo "Use 'npx skills@latest' to install/update skills and create agent symlinks."
