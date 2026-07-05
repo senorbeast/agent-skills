@@ -88,14 +88,50 @@ fi
 
 
 if [[ "$sync_global_agents" != "0" ]]; then
-  mkdir -p "$HOME/.codex"
   source_agents="$install_dir/AGENTS.md"
-  target_agents="$HOME/.codex/AGENTS.md"
-
   if [[ ! -f "$source_agents" ]]; then
     echo "Missing tracked AGENTS.md: $source_agents" >&2
     exit 1
   fi
+
+  # 1. Antigravity / Gemini Configuration
+  gemini_config_dir="$HOME/.gemini/config"
+  mkdir -p "$gemini_config_dir"
+  target_gemini_agents="$gemini_config_dir/AGENTS.md"
+  
+  if [[ -L "$target_gemini_agents" ]]; then
+    if [[ "$(readlink -f -- "$target_gemini_agents")" != "$(readlink -f -- "$source_agents")" ]]; then
+      echo "Replacing wrong AGENTS.md symlink: $target_gemini_agents"
+      rm "$target_gemini_agents"
+      ln -s "$(realpath -m --relative-to="$gemini_config_dir" "$source_agents")" "$target_gemini_agents"
+    fi
+  elif [[ -e "$target_gemini_agents" ]]; then
+    backup="$target_gemini_agents.backup.$(date +%Y%m%d%H%M%S)"
+    echo "Backing up existing $target_gemini_agents to $backup"
+    mv "$target_gemini_agents" "$backup"
+    ln -s "$(realpath -m --relative-to="$gemini_config_dir" "$source_agents")" "$target_gemini_agents"
+  else
+    ln -s "$(realpath -m --relative-to="$gemini_config_dir" "$source_agents")" "$target_gemini_agents"
+  fi
+
+  # Generate skills.json for Antigravity so it auto-discovers skills
+  skills_json_path="$gemini_config_dir/skills.json"
+  skills_dir="$install_dir/skills"
+  
+  if [[ -d "$skills_dir" ]]; then
+    cat <<EOF > "$skills_json_path"
+{
+  "entries": [
+    { "path": "$skills_dir" }
+  ]
+}
+EOF
+    echo "Created Antigravity skills.json at $skills_json_path pointing to $skills_dir"
+  fi
+
+  # 2. Codex Configuration (Legacy)
+  mkdir -p "$HOME/.codex"
+  target_agents="$HOME/.codex/AGENTS.md"
 
   if [[ -L "$target_agents" ]]; then
     if [[ "$(readlink -f -- "$target_agents")" == "$(readlink -f -- "$source_agents")" ]]; then

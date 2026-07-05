@@ -4,16 +4,25 @@ Agent-agnostic source of truth for personal and installed agent skills.
 
 ## One-Line Install
 
-Clone or update this repo at `~/.agents` and link global Codex guidance:
+### Linux/macOS
+Clone or update this repo at `~/.agents` and link global guidance:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/senorbeast/agent-skills/main/install.sh | bash
+```
+
+### Windows
+Clone or update this repo at `~\.agents` and link global guidance:
+
+```powershell
+Invoke-RestMethod -Uri https://raw.githubusercontent.com/senorbeast/agent-skills/main/install.ps1 | Invoke-Expression
 ```
 
 ## Layout
 
 - `AGENTS.md` is the tracked copy of global agent guidance.
 - `skills/` contains real skill directories.
+- `install.sh` and `install.ps1` setup symlinks and configurations.
 - `.skill-lock.json` tracks skills installed by `npx skills@latest`.
 
 ## Working With `npx skills`
@@ -51,14 +60,21 @@ In this setup:
 
 Do not clone this repo somewhere else while also letting `npx skills` manage `~/.agents`; that creates two sources of truth.
 
-## Global Guidance
+## Global Guidance & Skill Auto-Discovery
 
+### Google Antigravity / Gemini
+The installer automatically sets up Google Antigravity by linking the global guidance and creating `skills.json`:
+- Links `~/.gemini/config/AGENTS.md` -> `~/.agents/AGENTS.md`.
+- Creates `~/.gemini/config/skills.json` pointing to `~/.agents/skills` to automatically load all skills without individual symlinks.
+
+### Codex
 Codex reads global guidance from `~/.codex/AGENTS.md`. The installer links that file to this repo:
 
 ```bash
 ~/.codex/AGENTS.md -> ~/.agents/AGENTS.md
 ```
 
+### Claude Code
 Claude Code commonly uses `~/.claude/CLAUDE.md` for user-level guidance. To share the same tracked guidance file with Claude:
 
 ```bash
@@ -69,6 +85,7 @@ fi
 ln -sfn ../.agents/AGENTS.md ~/.claude/CLAUDE.md
 ```
 
+### Pi
 Pi discovers `AGENTS.md` and `CLAUDE.md` context files, but this install has no documented Pi-specific global guidance file. Use one of these approaches:
 
 ```bash
@@ -78,6 +95,7 @@ ln -s ~/.agents/AGENTS.md ./AGENTS.md
 # Per invocation
 pi --append-system-prompt ~/.agents/AGENTS.md
 ```
+
 
 ## Sync Symlinks
 
