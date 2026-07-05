@@ -49,15 +49,14 @@ if (-not $NoAgentsMd) {
     $SkillsDir = "$InstallDir\skills"
     
     if (Test-Path $SkillsDir) {
+        # Use forward slashes to avoid JSON escaping nightmares in PowerShell
+        $ForwardSlashSkillsDir = $SkillsDir -replace '\\', '/'
+        
         $SkillsJsonContent = @{
             entries = @(
-                @{ path = $SkillsDir.Replace('\', '\\') }
+                @{ path = $ForwardSlashSkillsDir }
             )
         } | ConvertTo-Json -Depth 3
-        
-        # Write to skills.json but fix escaping in PowerShell JSON conversion
-        $SkillsJsonContent = $SkillsJsonContent -replace '\\\\', '\' # Temporary normalize
-        $SkillsJsonContent = $SkillsJsonContent -replace '\\', '\\\\' # Apply double slash for JSON
         
         Set-Content -Path $SkillsJsonPath -Value $SkillsJsonContent -Encoding UTF8
         Write-Host "Created Antigravity skills.json at $SkillsJsonPath pointing to $SkillsDir"
